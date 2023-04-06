@@ -1,0 +1,100 @@
+#:set global_font_size1 dp(40)
+
+WindowManager:
+    id: screen_manager
+    MainScreen:
+        id: main_screen
+        name: "main"
+        manager: "screen_manager"
+    BoardScreen:
+        id: board_screen
+        name: "board"
+        manager: "screen_manager"
+    ScoreScreen:
+        id: score_screen
+        name: "score"
+        manager: "screen_manager"
+
+<Tile>:
+    color: 0, 0, 0, 1
+    background_color: 0.5, 0.5, 0.5, 0.3
+    font_size: dp(40)
+
+<WhiteBackground@Widget>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<BoardScreen>:
+    WhiteBackground:
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(10), dp(10), dp(10), dp(10)
+        Timer:
+            id: timer
+            size_hint: 1, None
+            height: dp(60)
+            font_size: dp(50)
+            color: 0, 0, 0, 1
+
+        GridLayout:
+            id: layout
+            spacing: dp(5)
+
+<MainScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "Довжина"
+                font_size: global_font_size1
+            TextInput:
+                id: width_input
+                text: "10"
+                font_size: global_font_size1
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "Ширина"
+                font_size: global_font_size1
+            TextInput:
+                id: height_input
+                text: "10"
+                font_size: global_font_size1
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: "Шанс бомби"
+                font_size: global_font_size1
+            TextInput:
+                id: bomb_chance_input
+                text: "10"
+                font_size: global_font_size1
+        Button:
+            text: "Грати"
+            font_size: global_font_size1
+            on_press: app.root.current = "board"; app.root.get_screen("board").setup(int(height_input.text), int(width_input.text), int(bomb_chance_input.text))
+
+<ScoreScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        Label:
+            text: "Статистика"
+            font_size: global_font_size1
+        Label:
+            id: cleared_tiles_label
+            text: "Відкрито комірок"
+            font_size: global_font_size1
+        Label:
+            id: correctly_guessed_bombs_label
+            text: "Правильно позначані бомби"
+            font_size: global_font_size1
+        Button:
+            text: "Назад"
+            font_size: global_font_size1
+            on_press: app.root.current = "main"
