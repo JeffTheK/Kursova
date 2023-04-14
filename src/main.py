@@ -55,8 +55,9 @@ class ScoreScreen(Screen):
         self.ids.correctly_guessed_bombs_label.text = f"Правильно позначені бомби: {self.score.correctly_guessed_bombs}/{self.score.bombs_count}"
 
 class Tile(Button):
-    def __init__(self, is_bomb, **kwargs):
+    def __init__(self, pos, is_bomb, **kwargs):
         super().__init__(**kwargs)
+        self._pos = pos
         self.is_bomb = is_bomb
         self.is_flagged = False
         self.is_revealed = False
@@ -75,13 +76,54 @@ class Tile(Button):
         else:
             self.is_flagged = True
             icon = Image(source="icons/flag.png", size=(self.width / 1.5, self.height / 1.5))
-            icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
+            #icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
             self.icon = icon
             self.add_widget(icon)
             board_screen.score.flagged_tiles += 1 # FIXME
             if self.is_bomb:
                 board_screen.score.correctly_guessed_bombs += 1 # FIXME
         board_screen.update_bombs_left_label() # FIXME
+    
+    def reveal(self):
+        if self.is_flagged:
+            return
+        if self.is_bomb:
+            self.background_color = (1, 0, 0, 1)
+            App.get_running_app().root.get_screen("board").on_game_over()
+            self.is_revealed = True
+        else:
+            self.reveal_non_bomb_tile()
+    
+    def reveal_non_bomb_tile(self):
+        col = self._pos[0]
+        row = self._pos[1]
+        positions = [
+            (col + 1, row),
+            (col - 1, row),
+            (col, row + 1),
+            (col, row - 1),
+        ]
+
+        board_screen = App.get_running_app().root.get_screen("board")
+
+        print(row)
+        print(col)
+        if self.is_bomb or self.is_revealed:
+            return
+
+        self.is_revealed = True
+        self.background_color = (0, 0, 0, 0)
+        nearby_bombs_count = board_screen.count_nearby_bombs(self._pos)
+        if (nearby_bombs_count > 0):
+            self.text = str(board_screen.count_nearby_bombs(self._pos))
+            self.color = board_screen.nearby_bombs_colors[nearby_bombs_count]
+        else:
+            for pos_ in positions:
+                if board_screen.get_tile_at(pos_) != None:
+                    tile = board_screen.get_tile_at(pos_)
+                    tile.reveal_non_bomb_tile()
+        board_screen.score.cleared_tiles += 1
+        board_screen.check_for_win()
 
 class BoardScreen(Screen):
     tiles = {}
@@ -122,7 +164,7 @@ class BoardScreen(Screen):
                 is_bomb = random.randrange(0, 100) <= self.bomb_chance
                 if is_bomb:
                     bombs_count += 1
-                tile = Tile(is_bomb)
+                tile = Tile((col, row), is_bomb)
                 tile.bind(on_touch_down=lambda _, touch, pos=(col, row): self.on_tile_touch_down(pos, touch))
                 #tile.text = str(col) + " " + str(row)
                 self.tiles[(col, row)] = (tile)
@@ -137,9 +179,9 @@ class BoardScreen(Screen):
             return
 
         if touch.button == "left":
-            self.reveal_tile(pos)
+            tile.reveal()
         elif touch.button == "right":
-           tile.flag()
+            tile.flag()
 
     def count_nearby_bombs(self, pos) -> int:
         col = pos[0]
@@ -162,44 +204,6 @@ class BoardScreen(Screen):
 
         return count
     
-    def reveal_non_bomb_tile(self, pos):
-        col = pos[0]
-        row = pos[1]
-        positions = [
-            (col + 1, row),
-            (col - 1, row),
-            (col, row + 1),
-            (col, row - 1),
-        ]
-
-        tile = self.get_tile_at(pos)
-        if tile.is_bomb or tile.is_revealed:
-            return
-
-        tile.is_revealed = True
-        tile.background_color = (0, 0, 0, 0)
-        nearby_bombs_count = self.count_nearby_bombs(pos)
-        if (nearby_bombs_count > 0):
-            tile.text = str(self.count_nearby_bombs(pos))
-            tile.color = self.nearby_bombs_colors[nearby_bombs_count]
-        else:
-            for pos_ in positions:
-                if self.get_tile_at(pos_) != None:
-                    self.reveal_non_bomb_tile(pos_)
-        self.score.cleared_tiles += 1
-        self.check_for_win()
-    
-    def reveal_tile(self, pos):
-        tile = self.get_tile_at(pos)
-        if tile.is_flagged:
-            return
-        if tile.is_bomb:
-            tile.background_color = (1, 0, 0, 1)
-            App.get_running_app().root.get_screen("board").on_game_over()
-            tile.is_revealed = True
-        else:
-            self.reveal_non_bomb_tile(pos)
-
     def get_tile_at(self, pos) -> Tile:
         col = pos[0]
         row = pos[1]
