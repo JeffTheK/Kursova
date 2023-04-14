@@ -76,7 +76,7 @@ class Tile(Button):
         else:
             self.is_flagged = True
             icon = Image(source="icons/flag.png", size=(self.width / 1.5, self.height / 1.5))
-            #icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
+            icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
             self.icon = icon
             self.add_widget(icon)
             board_screen.score.flagged_tiles += 1 # FIXME
@@ -102,6 +102,10 @@ class Tile(Button):
             (col - 1, row),
             (col, row + 1),
             (col, row - 1),
+            (col + 1, row + 1),
+            (col - 1, row - 1),
+            (col + 1, row - 1),
+            (col - 1, row + 1)
         ]
 
         board_screen = App.get_running_app().root.get_screen("board")
