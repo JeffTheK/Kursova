@@ -60,6 +60,28 @@ class Tile(Button):
         self.is_bomb = is_bomb
         self.is_flagged = False
         self.is_revealed = False
+    
+    def flag(self):
+        if self.is_revealed:
+            return
+        board_screen = App.get_running_app().root.get_screen("board")
+
+        if self.is_flagged:
+            self.is_flagged = False
+            self.remove_widget(self.icon)
+            board_screen.score.flagged_tiles -= 1
+            if self.is_bomb:
+                self.score.correctly_guessed_bombs -= 1
+        else:
+            self.is_flagged = True
+            icon = Image(source="icons/flag.png", size=(self.width / 1.5, self.height / 1.5))
+            icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
+            self.icon = icon
+            self.add_widget(icon)
+            board_screen.score.flagged_tiles += 1 # FIXME
+            if self.is_bomb:
+                board_screen.score.correctly_guessed_bombs += 1 # FIXME
+        board_screen.update_bombs_left_label() # FIXME
 
 class BoardScreen(Screen):
     tiles = {}
@@ -117,30 +139,7 @@ class BoardScreen(Screen):
         if touch.button == "left":
             self.reveal_tile(pos)
         elif touch.button == "right":
-            self.flag_tile(pos)
-
-    def flag_tile(self, pos):
-        tile = self.get_tile_at(pos)
-
-        if tile.is_revealed:
-            return
-
-        if tile.is_flagged:
-            tile.is_flagged = False
-            tile.remove_widget(tile.icon)
-            self.score.flagged_tiles -= 1
-            if tile.is_bomb:
-                self.score.correctly_guessed_bombs -= 1
-        else:
-            tile.is_flagged = True
-            icon = Image(source="icons/flag.png", size=(tile.width / 1.5, tile.height / 1.5))
-            icon.pos = (tile.x + tile.width / 2 - icon.width / 2, tile.y + tile.height / 2 - icon.height / 2)
-            tile.icon = icon
-            tile.add_widget(icon)
-            self.score.flagged_tiles += 1
-            if tile.is_bomb:
-                self.score.correctly_guessed_bombs += 1
-        self.update_bombs_left_label()
+           tile.flag()
 
     def count_nearby_bombs(self, pos) -> int:
         col = pos[0]
