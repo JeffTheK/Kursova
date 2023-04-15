@@ -14,9 +14,6 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 Config.set('graphics', 'width', '1000')
 Config.set('graphics', 'height', '720')
 
-class MyButton(Button):
-    pass
-
 class Difficulty:
     def __init__(self, width, height, bomb_chance) -> None:
         self.width = width
