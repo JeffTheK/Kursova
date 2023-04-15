@@ -98,7 +98,7 @@ class BoardScreen(Screen):
     def count_nearby_bombs(self, pos) -> int:
         col = pos[0]
         row = pos[1]
-        print("kek" + str(col) + " " + str(row))
+        print("amount" + str(col) + " " + str(row))
         count = 0
         positions = [
             (col + 1, row),
