@@ -1,5 +1,6 @@
 from kivy.uix.button import Button
 from kivy.app import App
+from kivy.uix.image import Image
 
 class Tile(Button):
     def __init__(self, pos, is_bomb, **kwargs):
@@ -19,7 +20,7 @@ class Tile(Button):
             self.remove_widget(self.icon)
             board_screen.score.flagged_tiles -= 1
             if self.is_bomb:
-                self.score.correctly_guessed_bombs -= 1
+                board_screen.score.correctly_guessed_bombs -= 1
         else:
             self.is_flagged = True
             icon = Image(source="icons/flag.png", size=(self.width / 1.5, self.height / 1.5))
