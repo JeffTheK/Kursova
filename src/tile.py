@@ -33,8 +33,12 @@ class Tile(Button):
         board_screen.update_bombs_left_label() # FIXME
     
     def reveal(self):
+        board_screen = App.get_running_app().root.get_screen("board")
+
         if self.is_flagged:
             return
+        if board_screen.score.cleared_tiles == 0:
+            self.is_bomb = False
         if self.is_bomb:
             self.background_color = (1, 0, 0, 1)
             App.get_running_app().root.get_screen("board").on_game_over()

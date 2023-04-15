@@ -81,7 +81,7 @@ class BoardScreen(Screen):
                 #tile.text = str(col) + " " + str(row)
                 self.tiles[(col, row)] = (tile)
                 self.ids.layout.add_widget(tile)
-        self.score = Score(cols * rows, bombs_count)
+        self.score = Score(cols * rows, bombs_count - 1)
         self.score.flagged_tiles = 0
         self.update_bombs_left_label()
 
