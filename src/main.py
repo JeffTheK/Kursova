@@ -59,6 +59,8 @@ class BoardScreen(Screen):
         self.setup(difficulty.height, difficulty.width, difficulty.bomb_chance)
 
     def setup(self, cols, rows, bomb_chance):
+        self.cols = cols
+        self.rows = rows
         if self.tiles != None:
             for tile in self.tiles.values():
                 self.ids.layout.remove_widget(tile)
@@ -67,20 +69,65 @@ class BoardScreen(Screen):
         self.ids.layout.rows = rows
         self.ids.timer.start()
         self.bomb_chance = bomb_chance
-        bombs_count = 0
         for row in range(rows):
             for col in range(cols):
-                is_bomb = random.randrange(0, 100) <= self.bomb_chance
-                if is_bomb:
-                    bombs_count += 1
-                tile = Tile((col, row), is_bomb)
+                tile = Tile((col, row), False)
                 tile.bind(on_touch_down=lambda _, touch, pos=(col, row): self.on_tile_touch_down(pos, touch))
                 #tile.text = str(col) + " " + str(row)
                 self.tiles[(col, row)] = (tile)
                 self.ids.layout.add_widget(tile)
-        self.score = Score(cols * rows, bombs_count - 1)
+        self.score = Score(cols * rows, 0)
+    
+    def setup_bombs(self, start_tile):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                is_bomb = random.randrange(0, 100) <= self.bomb_chance
+                tile = self.tiles[(col, row)]
+                tile.is_bomb = is_bomb
+        self.setup_starting_cavern(start_tile)
+        self.setup_score()
+    
+    def setup_starting_cavern(self, start_tile):
+        cavern_size = int((self.rows * self.cols) * 0.05)
+        cavern_tiles = [start_tile]
+        print("=======")
+        print(cavern_size)
+        col = start_tile._pos[0]
+        row = start_tile._pos[1]
+        positions = [
+                (col + 1, row),
+                (col - 1, row),
+                (col, row + 1),
+                (col, row - 1),
+                (col + 1, row + 1),
+                (col - 1, row - 1),
+                (col + 1, row - 1),
+                (col - 1, row + 1)
+            ]
+        cavern_tiles.append(self.get_tile_at(positions[0]))
+        cavern_tiles.append(self.get_tile_at(positions[1]))
+        cavern_tiles.append(self.get_tile_at(positions[2]))
+        cavern_tiles.append(self.get_tile_at(positions[3]))
+        for x in range(cavern_size):
+            tile = random.choice(cavern_tiles)
+            col = tile._pos[0]
+            row = tile._pos[1]
+            position = random.choice(positions)
+            new_tile = self.get_tile_at(position)
+            if new_tile is not None:
+                cavern_tiles.append(new_tile)
+        for t in cavern_tiles:
+            print("WDwdWD")
+            print(t._pos)
+            t.is_bomb = False
+    
+    def setup_score(self):
+        bombs_count = 0
+        for t in self.tiles.values():
+            if t.is_bomb:
+                bombs_count += 1
+        self.score = Score(self.cols * self.rows, bombs_count - 1)
         self.score.flagged_tiles = 0
-        self.update_bombs_left_label()
 
     def on_tile_touch_down(self, pos, touch):
         tile = self.get_tile_at(pos)
@@ -88,6 +135,11 @@ class BoardScreen(Screen):
             return
 
         if touch.button == "left":
+            if self.score == None or self.score.cleared_tiles == 0:
+                tile.is_bomb = False
+                print("+W+D+W+D")
+                print(tile._pos)
+                self.setup_bombs(tile)
             tile.reveal()
         elif touch.button == "right":
             tile.flag()
@@ -95,7 +147,7 @@ class BoardScreen(Screen):
     def count_nearby_bombs(self, pos) -> int:
         col = pos[0]
         row = pos[1]
-        print("amount" + str(col) + " " + str(row))
+        #print("amount" + str(col) + " " + str(row))
         count = 0
         positions = [
             (col + 1, row),
@@ -107,7 +159,7 @@ class BoardScreen(Screen):
             (col + 1, row - 1),
             (col - 1, row + 1)]
         for pos_ in positions:
-            print(pos_)
+            #print(pos_)
             if self.get_tile_at(pos_) != None and self.get_tile_at(pos_).is_bomb:
                 count += 1
 
@@ -122,8 +174,8 @@ class BoardScreen(Screen):
             return self.tiles[pos]
 
     def check_for_win(self):
-        print(self.score.bombs_count)
-        print(self.score.cleared_tiles)
+        #print(self.score.bombs_count)
+        #print(self.score.cleared_tiles)
         if (self.score.cleared_tiles + self.score.bombs_count == self.score.total_tiles):
             self.on_win()
             
