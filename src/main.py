@@ -104,10 +104,9 @@ class BoardScreen(Screen):
                 (col + 1, row - 1),
                 (col - 1, row + 1)
             ]
-        cavern_tiles.append(self.get_tile_at(positions[0]))
-        cavern_tiles.append(self.get_tile_at(positions[1]))
-        cavern_tiles.append(self.get_tile_at(positions[2]))
-        cavern_tiles.append(self.get_tile_at(positions[3]))
+        for x in range(len(positions)):
+        	cavern_tiles.append(self.get_tile_at(positions[x]))
+
         for x in range(cavern_size):
             tile = random.choice(cavern_tiles)
             col = tile._pos[0]
