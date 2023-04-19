@@ -90,8 +90,6 @@ class BoardScreen(Screen):
     def setup_starting_cavern(self, start_tile):
         cavern_size = int((self.rows * self.cols) * 0.05)
         cavern_tiles = [start_tile]
-        print("=======")
-        print(cavern_size)
         col = start_tile._pos[0]
         row = start_tile._pos[1]
         positions = [
@@ -116,8 +114,6 @@ class BoardScreen(Screen):
             if new_tile is not None:
                 cavern_tiles.append(new_tile)
         for t in cavern_tiles:
-            print("WDwdWD")
-            print(t._pos)
             t.is_bomb = False
     
     def setup_score(self):
@@ -136,8 +132,6 @@ class BoardScreen(Screen):
         if touch.button == "left":
             if self.score == None or self.score.cleared_tiles == 0:
                 tile.is_bomb = False
-                print("+W+D+W+D")
-                print(tile._pos)
                 self.setup_bombs(tile)
             tile.reveal()
         elif touch.button == "right":
