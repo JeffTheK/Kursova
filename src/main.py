@@ -26,6 +26,7 @@ class Score:
         self.bombs_count = bombs_count
         self.cleared_tiles = 0
         self.correctly_guessed_bombs = 0
+        self.flagged_tiles = 0
 
 class ScoreScreen(Screen):
     score: Score = None
@@ -179,10 +180,8 @@ class BoardScreen(Screen):
     def on_game_over(self):
         for tile in self.tiles.values():
             if tile.is_bomb:
-                icon = Image(source="icons/bomb.png", size=(tile.width / 1.5, tile.height / 1.5))
-                icon.pos = (tile.x + tile.width / 2 - icon.width / 2, tile.y + tile.height / 2 - icon.height / 2)
-                tile.icon = icon
-                tile.add_widget(icon)
+                tile.icon.source = "icons/bomb.png"
+                tile.icon.opacity = 1
         
         def transition_to_stats_screen():
             App.get_running_app().root.current = "score"

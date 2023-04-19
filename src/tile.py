@@ -9,28 +9,34 @@ class Tile(Button):
         self.is_bomb = is_bomb
         self.is_flagged = False
         self.is_revealed = False
+        self.icon = self.ids.icon
+    
+    def remove_flag(self):
+        board_screen = App.get_running_app().root.get_screen("board")
+        self.is_flagged = False
+        if self.icon is not None:
+            self.icon.opacity = 0
+        board_screen.score.flagged_tiles -= 1
+        if self.is_bomb:
+            board_screen.score.correctly_guessed_bombs -= 1
+    
+    def add_flag(self):
+        board_screen = App.get_running_app().root.get_screen("board")
+        self.is_flagged = True
+        self.icon.source = "icons/flag.png"
+        self.icon.opacity = 1
+        board_screen.score.flagged_tiles += 1
+        if self.is_bomb:
+            board_screen.score.correctly_guessed_bombs += 1
     
     def flag(self):
         if self.is_revealed:
             return
-        board_screen = App.get_running_app().root.get_screen("board")
 
         if self.is_flagged:
-            self.is_flagged = False
-            self.remove_widget(self.icon)
-            board_screen.score.flagged_tiles -= 1
-            if self.is_bomb:
-                board_screen.score.correctly_guessed_bombs -= 1
+            self.remove_flag()
         else:
-            self.is_flagged = True
-            icon = Image(source="icons/flag.png", size=(self.width / 1.5, self.height / 1.5))
-            icon.pos = (self.x + self.width / 2 - icon.width / 2, self.y + self.height / 2 - icon.height / 2)
-            self.icon = icon
-            self.add_widget(icon)
-            board_screen.score.flagged_tiles += 1 # FIXME
-            if self.is_bomb:
-                board_screen.score.correctly_guessed_bombs += 1 # FIXME
-        board_screen.update_bombs_left_label() # FIXME
+            self.add_flag()
     
     def reveal(self):
         board_screen = App.get_running_app().root.get_screen("board")
@@ -60,6 +66,8 @@ class Tile(Button):
         ]
 
         board_screen = App.get_running_app().root.get_screen("board")
+
+        self.remove_flag()
 
         #print(row)
         #print(col)
